@@ -1,26 +1,45 @@
 # frozen_string_literal: true
 
-# RSpec.describe Kubo do
-#   it "has a version number" do
-#     expect(Kubo::VERSION).not_to be nil
-#   end
-# end
+RSpec.describe Kubo do
+  it "has a version number" do
+    expect(Kubo::VERSION).not_to be nil
+  end
+end
 
-RSpec.describe Kubo::Cache do
+RSpec.describe Kubo::Zip do
   before do
-    @type_zip = :zip
-    @type_marshal = :marshal
+    @kubo = Kubo::Zip.new
   end
 
-  context "initialize" do
-    it "creates a zip instance" do
-      kubo = Kubo::Cache.new(@type_zip)
-      expect(kubo.type).to eq(@type_zip)
+  context "Initialize" do
+    it "Zip instance" do
+      expect(@kubo.respond_to?("time=")).to eq(true)
+      expect(@kubo.respond_to?("path=")).to eq(true)
+    end
+  end
+end
+
+RSpec.describe Kubo::Zip do
+  before do
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d", years: "1y" }
+    @kubo  = Kubo::Zip.new(@times[:hours])
+  end
+
+  context "Convert" do
+    it "To seconds" do
+      expect(@kubo.parse_time(@times[:seconds])).to eq(1)
     end
 
-    it "creates a marshal instance" do
-      kubo = Kubo::Cache.new(@type_marshal)
-      expect(kubo.type).to eq(@type_marshal)
+    it "To minutes" do
+      expect(@kubo.parse_time(@times[:minutes])).to eq(60)
+    end
+
+    it "To hours" do
+      expect(@kubo.parse_time(@times[:hours])).to eq(3600)
+    end
+
+    it "To days" do
+      expect(@kubo.parse_time(@times[:days])).to eq(864_00)
     end
   end
 end
