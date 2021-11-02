@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = Kubo::VERSION
   spec.authors       = ["EVOKE"]
   spec.email         = ["evoke.lektrique@gmail.com"]
-  s.license          = "AGPL-3.0-or-later"
+  spec.license       = "AGPL-3.0-or-later"
   spec.summary       = "Cache files."
   spec.description   = "Cache files long description here."
   spec.homepage      = "http://github.com/evokelektrique/kubo"
