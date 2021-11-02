@@ -7,13 +7,13 @@ Gem::Specification.new do |spec|
   spec.version       = Kubo::VERSION
   spec.authors       = ["EVOKE"]
   spec.email         = ["evoke.lektrique@gmail.com"]
-
+  s.license          = "AGPL-3.0-or-later"
   spec.summary       = "Cache files."
   spec.description   = "Cache files long description here."
   spec.homepage      = "http://github.com/evokelektrique/kubo"
   spec.required_ruby_version = ">= 2.7.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to 'https://mygemserver.com'"
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
