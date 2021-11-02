@@ -8,7 +8,9 @@ end
 
 RSpec.describe Kubo::Zip do
   before do
-    @kubo = Kubo::Zip.new
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo = Kubo::Zip.new(@times[:hours], @path)
   end
 
   context "Initialize" do
@@ -17,12 +19,25 @@ RSpec.describe Kubo::Zip do
       expect(@kubo.respond_to?("path=")).to eq(true)
     end
   end
+
+  context "Errors" do
+    it "Raise an error for invalid expiration" do
+      @kubo.time = "0h"
+      expect { @kubo.parse_time(@kubo.time) }.to raise_error(StandardError)
+    end
+
+    it "Raise an error when file is not found" do
+      key = "forbbiden_file"
+      expect(@kubo.file_exists?(key)).to eq(false)
+    end
+  end
 end
 
 RSpec.describe Kubo::Zip do
   before do
-    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d", years: "1y" }
-    @kubo  = Kubo::Zip.new(@times[:hours])
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo  = Kubo::Zip.new(@times[:hours], @path)
   end
 
   context "Convert" do
@@ -41,5 +56,84 @@ RSpec.describe Kubo::Zip do
     it "To days" do
       expect(@kubo.parse_time(@times[:days])).to eq(864_00)
     end
+  end
+end
+
+RSpec.describe Kubo::Zip do
+  before do
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo  = Kubo::Zip.new(@times[:hours], @path)
+  end
+
+  it "Generate a path" do
+    directory_status = Dir.exist?(@kubo.path)
+    expect(directory_status).to eq(true)
+  end
+end
+
+RSpec.describe Kubo::Zip do
+  before do
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo  = Kubo::Zip.new(@times[:hours], @path)
+    @key   = "test_key"
+    @value = "Test value!"
+  end
+
+  it "Save compressed content to the file" do
+    @kubo.save(@key, @value)
+    file = @kubo.file_empty?(@key)
+    expect(file).to be > 0
+  end
+
+  it "Decompress gzip" do
+    value = @kubo.read(@key)
+    expect(value.size).to be > 0
+  end
+end
+
+RSpec.describe Kubo::Zip do
+  before do
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo  = Kubo::Zip.new(@times[:seconds], @path)
+    @key   = "test_key"
+  end
+
+  it "Validate file expiration" do
+    # Sleep for a second so it expires
+    sleep 1
+    expired = @kubo.expired?(@key)
+    expect(expired).to be(true)
+  end
+end
+
+RSpec.describe Kubo::Zip do
+  before do
+    @times = { seconds: "1s", minutes: "1m", hours: "1h", days: "1d" }
+    @path  = "./test/my_cache"
+    @kubo  = Kubo::Zip.new(@times[:seconds], @path)
+    @key   = "test_key"
+    @value = "Test value!"
+  end
+
+  it "Flush a file" do
+    @kubo.flush(@key)
+    path = @kubo.get_file_path(@key)
+    expect(File.size(path)).to be(0)
+  end
+
+  it "Delete a file" do
+    @kubo.delete(@key)
+    expect(@kubo.file_exists?(@key)).to eq(false)
+  end
+
+  it "Delete the file if it is expired" do
+    @kubo.save(@key, @value)
+    # Sleep for a second so it expires
+    sleep 1
+    @kubo.delete_if_expired(@key)
+    expect(@kubo.file_exists?(@key)).to eq(false)
   end
 end
